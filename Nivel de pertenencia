@@ -21,6 +21,7 @@ level++;
 int x,y;
 int MCL = 3;
 int level_AMD;
+bool cluster=0;
 
 x = level_ADM % (MCL*2);
 y = (MCL*2) - x;
@@ -29,3 +30,6 @@ if (x<y)
 	level_AMD = x;
 else
 	level_AMD = y;
+
+if (x==0)
+	cluster=1;
