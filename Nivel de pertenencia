@@ -1,0 +1,31 @@
+#include <iostream>
+
+using namespace std
+
+//ADM
+
+int level_ADM = 255;
+
+int start = millis();
+
+while (millis()<start+600){
+	if(thread.level < level_ADM){
+		level_ADM=thread.level;
+	}
+}
+
+level++;
+
+//AMD
+
+int x,y;
+int MCL = 3;
+int level_AMD;
+
+x = level_ADM % (MCL*2);
+y = (MCL*2) - x;
+
+if (x<y)
+	level_AMD = x;
+else
+	level_AMD = y;
