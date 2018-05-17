@@ -7,14 +7,15 @@ using namespace std;
 
 int main()
 {
-	char PT [24] = 10;
-	char CTS [32] = 0;
-	char RTS [32] = 0;
-	char ACK_IN [24] = 10;
-	char ACK_OUT [24] = 10;
-	char TRAMA [32] = 1000; // trama de alarma
+	char PT[24] = 10;
+	char CTS[32] = 0;
+	char RTS[32] = 0;
+	char ACK_IN[24] = 10;
+	char ACK_OUT[24] = 10;
+	char TRAMA[32] = 1000; // trama de alarma
+	int contador_p = 0;
 
-	enum state { primera_fase, segunda_fase, escucha, verificacion};
+	enum state { primera_fase, segunda_fase, escucha, verificacion };
 	enum state current_state = primera_fase;
 
 	while (current_state != verificacion)
@@ -23,17 +24,26 @@ int main()
 		{
 		case primera_fase:
 		{
-            Sleep(20);
-			if (RTS !=0 or CTS!=0)//verifica si estan activos 
-			   Sleep(90);//tiempo de espera 9B
-			   PT = 17393; // envio de trama PT
-			   current_state = primera_fase;
+			if (RTS == 0) // si CTS o RTS estan activos
 			{
-            else
-                return Hibernar;
-				cout << "Hibernando \n";
-
+				if (contador_p == 3)
+				{
+					// Hibernación
+					contador_p = 0;
+				}
+				else
+				{
+					Sleep(10); // tiempo de espera para trasmisión
+					current_state = primera_fase;
+					contador_p = contador_p + 1;
+				}
+			else
+			{
+				current_state = segunda_fase;
+				contador_p = 0;
 			}
+			}
+
 			break;
 		}
 
@@ -41,33 +51,41 @@ int main()
 		{
 			if (RTS != 0)
 			{
-               CTS = 17393; // envio de trama CTS
-               current_state = segundo_estado;
-				}
-				
-			else
-			{
-				return Hibernar;
-				cout << "Hibernando \n";
+				CTS = 17393; // envio de trama CTS
+				current_state = segundo_estado;
+				Sleep(20);
 			}
 			break;
 		}
 
+
 		case escucha:
 
 		{
+			Sleep(20) //tiempo de espera 2B
+			if (TRAMA!=0)
+			{
+				current_state = verificacion;
+			}
+		
+			else
+			{
 
-		TRAMA = 0000;
-		Sleep(20) //tiempo de espera 2B
-        current_state = escucha;
-
+				Sleep(10); // tiempo de espera 
+				TRAMA=000;
+				current_state = primera_fase;
+			}
 			break;
 		}
+			
+		
+
+
 
 		case verificacion:
 
 		{
-			TRAMA = 1527;
+			
 			ACK_OUT = 1232;
 			Sleep(20) //tiempo de espera 2B
 			if (ACK_IN == ACK_OUT)
@@ -83,7 +101,7 @@ int main()
 
 			break;
 		}
-		}
+		
 
 	}
     return 0;
