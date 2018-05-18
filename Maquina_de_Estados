@@ -188,7 +188,7 @@ void loop() {
 }
 
 /*Nivel de Pertenencia ADM*/
-int nivel(void)
+int nivel(int level_AMD, int level_ADM)
 {
   while (millis()<start+600){
     if(thread_level < level_ADM){
