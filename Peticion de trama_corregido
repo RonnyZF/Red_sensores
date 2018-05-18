@@ -8,93 +8,96 @@ using namespace std;
 
 int peticion_trama()
 {
-	char PT[4] = {10};
-	char CTS[5] = {0};
-	char RTS[5] = {0};
-	char ACK_IN[4] = {10};
-	char ACK_OUT[4] = {10};
-	char TRAMA[5] = {100}; // trama de alarma
+	char PT[4];
+	char CTS[5];
+	char RTS[5] ;
+	char ACK_IN[4] ;
+	char ACK_OUT[4] ;
+	char Malarma[];
+	char TRAMA[]; // trama de alarma
 	int contador_p = {0};
-
+	
+    
+    char PT [4];
 	enum state { primera_fase, segunda_fase, escucha, verificacion };
 	enum state current_state = primera_fase;
 
+    
+    
+    
 	while (current_state != verificacion)
 	{
 		switch (current_state)
 		{
 		case primera_fase:
 		{
-			if (RTS == 0) // si CTS o RTS estan activos
+             escucha(2*B);
+			if (CTS == 0 and RTS == 0) // si CTS o RTS estan activos
 			{
-				if (contador_p == 3)
-				{
-					// HibernaciÃ³n
-					contador_p = 0;
-				}
-				else
-				{
-					sleep(20); // tiempo de espera 2B
-					current_state = primera_fase;
-					contador_p = contador_p + 1;
-				}
-			}
-			else
-			{
-				current_state = segunda_fase;
-				contador_p = 0;
-			}
+               PT[0]='±';
+               PT[1]='0';
+               PT[2]='nvpertenencia';
+               PT[3]='mac';
+               rf69.send(PT, sizeof(PT)); // asi se envia un dato
+               
+               //oPT = 1; ///enviar PT, send rx.
+               Escucha(2*B);
+               if (RTS != 0)
+               current_state = segunda_fase;
+               else
+               hibernacion();
+               }
 			break;
 		}
 
+
+     
 		case segunda_fase:
 		{
-			if (RTS != 0)
-			{
-				//CTS = 17393; // envio de trama CTS
-				strncpy(CTS, "17393", 5);
-				current_state = segunda_fase;
-				sleep(20);
-			}
+             Escucha(2*B);
+             if(CTS == 0)
+             {
+                    CTS[0]='¾';
+                    CTS[1]='0';
+                    CTS[2]='nvpertenencia';
+                    CTS[3]=5;
+                    CTS[4]='mac';
+                    rf69.send(CTS, sizeof(CTS));
+                    //oCTS = 1;
+			        current_state = segunda_fase;
+             }
 			break;
 		}
 		case escucha:
 			{
-				sleep(20); //tiempo de espera 2B
+				escucha(2*B); //tiempo de espera 2B
 				if (TRAMA!=0)	{
 					current_state = verificacion;
 				}
 				else 	{
-					sleep(20); // tiempo de espera
 					//TRAMA=000;
-					strncpy(TRAMA, "00000", 5);
+					///strncpy(TRAMA, "00000", 5);
 					current_state = primera_fase;
 				}
 				break;
 			}
 		case verificacion:
 		{
+             ACK_OUT = 1;
 			//ACK_OUT = 1232;
-			strncpy(ACK_OUT, "1232", 4);
-			sleep(20); //tiempo de espera 2B
-			if (ACK_IN == ACK_OUT)
+			//strncpy(ACK_OUT, "1232", 4);
+			Malarma = TRAMA;
+			escucha(2*B); //tiempo de espera 2B
+			
+			if (Malarma == TRAMA)
 			{
-				//TRAMA = 0000;
-				//strncpy(TRAMA, "00000", 5);
+				
+				//guardar trama en la pila;
 				current_state = primera_fase;
-			}
-			else
-			{
-				current_state = verificacion;
 			}
 			break;
 		}
 	}
     return 0;
 }
-}
-int Hibernar()
-{
-	cout << "Hibernando\n";
-	return 0;
 }
