@@ -1,0 +1,216 @@
+
+
+
+  /*variables para estados*/
+int alarma=0;
+int alarma_pila=0;
+int tramas_pila=0;
+int T=20;
+int NumT=0;
+int RTS_reci=0;
+int CTS_env=0;
+int rec_alarma=0;
+int CHECK=0;
+int Correcion=0;
+int Res_peticion_trama=0;
+int PT =0;
+int RTS_env=0;
+int CTS_reci=0;
+int Trama_ack=0;
+int cont=0;
+int Estado=0;
+
+int level_ADM = 255;
+int start = millis();
+int thread_level;
+int x,y;
+int MCL = 3;
+int level_AMD;
+bool cluster=0;
+
+void setup() {
+  
+}
+
+/* Estados 
+hibernacion=0
+escuchapt=1
+clusterdefinicion=2
+primera fase de peticion de trama=3
+segunda fase de peticion de trama=4
+escucha=5
+verificacion=6
+guardar alama en pila=7
+alarmas en la pila=8
+hay tramas por transmitir=9
+comprimir alarmas y enviar siguiente salto de amd=10
+primer estado de espera=11
+segundo estado de esepera=12
+tercer estado de espera=13
+cuarto estado de espera =14
+se conprimen las alarmas  se enmvian hacia el siguente estado de ADM=15
+
+*/
+void loop() {
+ switch (Estado)
+{
+  case 0:
+  if (alarma == 0)/* busca si tiene alarmas*/
+  {
+    Estado=1;
+    }
+  if (alarma == 1)/* si hay alarmas va a ;a peticion */
+  {
+    Estado=3;
+    }
+  break;
+  case 1:
+  Estado=2;
+  break;
+  case 2:
+  Estado=3;
+  break;
+  case 3:
+  if (RTS_reci == 1)/* busca si tiene alarmas*/
+  {
+    Estado=4;
+    }
+  if (RTS_reci == 0)/* si hay alarmas va a ;a peticion */
+  {
+    Estado=9;
+    }
+   break;
+  case 4:
+  Estado=5;
+  break;
+  case 5:
+  if (rec_alarma==0)
+  {
+    Estado=3;
+    }
+  if (rec_alarma==1)
+  {
+    Estado=6;
+  }
+  break;
+  case 6:
+  if (CHECK==1)
+  {
+    Estado=6;
+    }
+  if (CHECK==0)
+  {
+    Estado=7;
+  }
+  break;
+  case 7:
+  Estado=3;
+  break;
+  case 8:
+  if (alarma_pila==1)
+  {
+    Estado=9;
+    }
+  if (alarma_pila==0)
+  {
+    Estado=0;
+  }
+  break;
+  case 9:
+  if (tramas_pila==1)
+  {
+    Estado=15;
+    }
+  if (tramas_pila==0)
+  {
+    Estado=10;
+  }
+  break;
+  case 10:
+  Estado=11; 
+  case 11:
+  if (PT==1)
+  {
+    Estado=12;
+    }
+  if (PT==0)
+  {
+    Estado=1;
+  }
+  break;
+  case 12:
+  if (RTS_env==0&&cont<=3)
+  {
+    Estado=11;
+    }
+  if (RTS_env==0&&cont>=3)
+  {
+    Estado=0;
+  }
+  if (RTS_env==1)
+  {
+    Estado=13;
+    }
+  break;
+  case 13:
+  if (CTS_reci==0&&cont<=3)
+  {
+    Estado=11;
+    }
+  if (CTS_reci==0&&cont>=3)
+  {
+    Estado=0;
+  }
+  if (CTS_reci==1)
+  {
+    Estado=14;
+    }
+  case 14:
+  if (Trama_ack==1)
+  {
+    Estado=0;
+    }
+  if (Trama_ack==0)
+  {
+    Estado=0;
+  }
+  if (Trama_ack==2)
+  {
+    Estado=14;
+  }
+  break;
+  case 15:
+  Estado=11;
+  break;
+  
+  
+}
+}
+
+/*Nivel de Pertenencia ADM*/
+int nivel(void)
+{
+  while (millis()<start+600){
+    if(thread_level < level_ADM){
+      level_ADM=thread_level;
+    }
+  }
+  
+  level_ADM++;
+  
+  /*Nivel de Pertenencia AMD*/
+  
+  x = level_ADM % (MCL*2);
+  y = (MCL*2) - x;
+  
+  if (x<y)
+    level_AMD = x;
+  else
+    level_AMD = y;
+  
+  if (x==0)
+    cluster=1;
+
+
+}
+
