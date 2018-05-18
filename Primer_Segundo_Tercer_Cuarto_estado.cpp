@@ -1,6 +1,3 @@
-﻿// ConsoleApplication1.cpp: define el punto de entrada de la aplicación de consola.
-//
-
 #include "stdafx.h"
 #include <iostream>
 #include <windows.h>
@@ -11,12 +8,12 @@ using namespace std;
 
 int main()
 {
-	int PT = 10;
-	int CTS = 0;
-	int RTS = 0;
-	int ACK_IN = 10;
-	int ACK_OUT = 10;
-	int TRAMA = 1000; // trama de alarma
+	char PT[4];
+	char CTS[5];
+	char RTS[5] ;
+	char ACK_IN[3] ;
+	char ACK_OUT[3] ;
+	int TRAMA[1]; // trama de alarma
 	int ID_NODE = 10; // ID del nodo actual
 	int ID_NODE_IN = 20; // ID del nodo escuchado
 	int contador_p = 0; // contador del primer estado de espera
@@ -32,7 +29,6 @@ int main()
 		switch (current_state)
 		{
 		case primer_estado:
-		
 		{
 			if (PT != 0)
 			{
@@ -48,8 +44,6 @@ int main()
 					current_state = primer_estado;
 					contador_p = contador_p + 1;
 					cout << "Espera \n";
-					
-
 				}
 				if (ID_NODE_IN < (ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguracion
 				{
@@ -108,7 +102,7 @@ int main()
 				{
 					contador_s = contador_s + 1;
 					current_state = primer_estado;
-					
+
 					cout << "contador\n";
 					cout << contador_s;
 					cout << "\n";
@@ -192,6 +186,3 @@ int Hibernar()
 	cout << "Hibernando\n";
 	return 0;
 }
-
-
-
