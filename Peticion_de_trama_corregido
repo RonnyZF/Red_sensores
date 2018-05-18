@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <unistd.h>
+//#include <RH_RF69.h>
 
 using namespace std;
 
@@ -12,10 +13,10 @@ int peticion_trama()
 	char PT[4];
 	char CTS[5];
 	char RTS[5] ;
-	char ACK_IN[4] ;
-	char ACK_OUT[4] ;
+	char ACK_IN[3] ;
+	char ACK_OUT[3] ;
 	char Malarma[1];
-	char TRAMA[0]; // trama de alarma
+	char TRAMA[1]; // trama de alarma
 	int contador_p = {0};
 
 	enum state { primera_fase, segunda_fase, escucha, verificacion };
@@ -82,7 +83,9 @@ int peticion_trama()
 			}
 		case verificacion:
 		{
-             ACK_OUT = 1;
+             ACK_OUT[1] = 245;
+						 ACK_OUT[2] = 245;
+						 ACK_OUT[3] = 245;
 			//ACK_OUT = 1232;
 			//strncpy(ACK_OUT, "1232", 4);
 			Malarma = TRAMA;
