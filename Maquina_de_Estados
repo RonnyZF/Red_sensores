@@ -8,10 +8,9 @@
 #define RFM69_RST     4
 #define LED           13
 #endif
-
-
   /*variables para estados*/
 int alarma=0;
+int mio=0;
 int alarma_pila=0;
 int tramas_pila=0;
 int T=20;
@@ -28,7 +27,6 @@ int CTS_reci=0;
 int Trama_ack=0;
 int cont=0;
 int Estado=0;
-
 int level_ADM = 255;
 int start = millis();
 int thread_level;
@@ -36,8 +34,6 @@ int x,y;
 int MCL = 3;
 int level_AMD;
 bool cluster=0;
-
-// hibernacion
 int conth=0;
 int alarm=0;
 int conta=0;
@@ -51,10 +47,22 @@ int ctse;
 int rtse;
 int acke;
 int alarmae;
-
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 int16_t packetnum = 0;  //numero de paquetes que se envian
 
+/*COMPRESION*/
+
+int XC=0;
+int LC=0;
+int TC=0;
+int CC=0;
+char stringc[999999];
+int cambioc1=0;
+int cambioc2=0;
+int Alarmac;
+int NODOC;
+int TIPOC;
+/*COMPRESION*/
 void setup() {
   Serial.begin(115200);
   while (!Serial) ; // wait for Arduino Serial Monitor (native USB boards)
@@ -82,7 +90,7 @@ void setup() {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
   pinMode(LED, OUTPUT);//vuelven a definir el led
-  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz"); // para el serie 
+  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz"); // para el serie
 }
 
 /* Estados 
@@ -241,18 +249,15 @@ void loop() {
 }
 
 /*Nivel de Pertenencia ADM*/
-int nivel(int level_AMD, int level_ADM)
+int nivel(void)
 {
   while (millis()<start+600){
     if(thread_level < level_ADM){
       level_ADM=thread_level;
     }
   }
-  
   level_ADM++;
-  
   /*Nivel de Pertenencia AMD*/
-  
   x = level_ADM % (MCL*2);
   y = (MCL*2) - x;
   
@@ -260,12 +265,10 @@ int nivel(int level_AMD, int level_ADM)
     level_AMD = x;
   else
     level_AMD = y;
-  
   if (x==0)
     cluster=1;
-
-
 }
+
 void hibernacion(int cont, int alarm) {
  
   
@@ -314,7 +317,17 @@ void escucha() {
         rtse=0;
         alarmae=0;
         acke=0;
+        mio=1;
       }
+      if (buf[0]=='¾' && buf[4]!=mace){
+        pte=0;
+        ctse=1;
+        rtse=0;
+        alarmae=0;
+        acke=0;
+        mio=0;
+      }
+      
        if (buf[0]=='±') {
         pte=1;
         ctse=0;
@@ -350,3 +363,44 @@ void escucha() {
       Serial.println("Receive failed");
          }
   }
+
+
+/*compresion de datos*/
+
+void compresion() {
+int XC=0;
+int LC=0;
+int TC=0;
+int CC=0;
+char stringc[999999];
+int cambioc1=0;
+int cambioc2=0;
+int Alarmac;
+int NODOC;
+int TIPOC;
+while (XC != LC){
+  if (stringc[XC]==Alarmac){
+    stringc[XC+1]=stringc[XC+1]+1;
+    cambioc1=stringc[XC+2];
+    for (int i=XC+2; i <= LC+1; i++){
+      cambioc2=stringc[i+1];
+      stringc[i+1]=cambioc1;
+      cambioc1=cambioc2;
+    }
+    stringc[XC+2]=NODOC;
+  }
+ else{
+  stringc[0]=cambioc1;
+  for (int i=0; i <= 2; i++){
+      cambioc2=stringc[i+1];
+      stringc[i+1]=cambioc1;
+      cambioc1=cambioc2;
+    }
+  stringc[0]=TIPOC;
+  stringc[1]=1;
+  stringc[2]=NODOC;
+  
+ }
+} 
+    }
+
