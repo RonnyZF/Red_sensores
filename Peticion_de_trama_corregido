@@ -8,23 +8,22 @@ using namespace std;
 
 int peticion_trama()
 {
+	int B = 5;
 	char PT[4];
 	char CTS[5];
 	char RTS[5] ;
 	char ACK_IN[4] ;
 	char ACK_OUT[4] ;
-	char Malarma[];
-	char TRAMA[]; // trama de alarma
+	char Malarma[1];
+	char TRAMA[0]; // trama de alarma
 	int contador_p = {0};
-	
-    
-    char PT [4];
+
 	enum state { primera_fase, segunda_fase, escucha, verificacion };
 	enum state current_state = primera_fase;
 
-    
-    
-    
+
+
+
 	while (current_state != verificacion)
 	{
 		switch (current_state)
@@ -34,14 +33,14 @@ int peticion_trama()
              escucha(2*B);
 			if (CTS == 0 and RTS == 0) // si CTS o RTS estan activos
 			{
-               PT[0]='±';
-               PT[1]='0';
-               PT[2]='nvpertenencia';
-               PT[3]='mac';
+               PT[0] = 240;
+               PT[1]=48;
+               PT[2]=nvpertenencia;
+               PT[3]=mac;
                rf69.send(PT, sizeof(PT)); // asi se envia un dato
-               
+
                //oPT = 1; ///enviar PT, send rx.
-               Escucha(2*B);
+               escucha(2*B);
                if (RTS != 0)
                current_state = segunda_fase;
                else
@@ -51,17 +50,17 @@ int peticion_trama()
 		}
 
 
-     
+
 		case segunda_fase:
 		{
-             Escucha(2*B);
+             escucha(2*B);
              if(CTS == 0)
              {
-                    CTS[0]='¾';
-                    CTS[1]='0';
-                    CTS[2]='nvpertenencia';
-                    CTS[3]=5;
-                    CTS[4]='mac';
+                    CTS[0]=243;
+                    CTS[1]=0;
+                    CTS[2]=nvpertenencia;
+                    CTS[3]=5; //Se define una trama de tamaño 5
+                    CTS[4]=mac;
                     rf69.send(CTS, sizeof(CTS));
                     //oCTS = 1;
 			        current_state = segunda_fase;
@@ -88,10 +87,10 @@ int peticion_trama()
 			//strncpy(ACK_OUT, "1232", 4);
 			Malarma = TRAMA;
 			escucha(2*B); //tiempo de espera 2B
-			
+
 			if (Malarma == TRAMA)
 			{
-				
+
 				//guardar trama en la pila;
 				current_state = primera_fase;
 			}
@@ -101,3 +100,4 @@ int peticion_trama()
     return 0;
 }
 }
+
