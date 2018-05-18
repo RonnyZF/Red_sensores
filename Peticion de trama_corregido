@@ -1,0 +1,100 @@
+#include "stdafx.h"
+#include <iostream>
+#include <windows.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+using namespace std;
+
+int peticion_trama()
+{
+	char PT[4] = {10};
+	char CTS[5] = {0};
+	char RTS[5] = {0};
+	char ACK_IN[4] = {10};
+	char ACK_OUT[4] = {10};
+	char TRAMA[5] = {100}; // trama de alarma
+	int contador_p = {0};
+
+	enum state { primera_fase, segunda_fase, escucha, verificacion };
+	enum state current_state = primera_fase;
+
+	while (current_state != verificacion)
+	{
+		switch (current_state)
+		{
+		case primera_fase:
+		{
+			if (RTS == 0) // si CTS o RTS estan activos
+			{
+				if (contador_p == 3)
+				{
+					// HibernaciÃ³n
+					contador_p = 0;
+				}
+				else
+				{
+					sleep(20); // tiempo de espera 2B
+					current_state = primera_fase;
+					contador_p = contador_p + 1;
+				}
+			}
+			else
+			{
+				current_state = segunda_fase;
+				contador_p = 0;
+			}
+			break;
+		}
+
+		case segunda_fase:
+		{
+			if (RTS != 0)
+			{
+				//CTS = 17393; // envio de trama CTS
+				strncpy(CTS, "17393", 5);
+				current_state = segunda_fase;
+				sleep(20);
+			}
+			break;
+		}
+		case escucha:
+			{
+				sleep(20); //tiempo de espera 2B
+				if (TRAMA!=0)	{
+					current_state = verificacion;
+				}
+				else 	{
+					sleep(20); // tiempo de espera
+					//TRAMA=000;
+					strncpy(TRAMA, "00000", 5);
+					current_state = primera_fase;
+				}
+				break;
+			}
+		case verificacion:
+		{
+			//ACK_OUT = 1232;
+			strncpy(ACK_OUT, "1232", 4);
+			sleep(20); //tiempo de espera 2B
+			if (ACK_IN == ACK_OUT)
+			{
+				//TRAMA = 0000;
+				//strncpy(TRAMA, "00000", 5);
+				current_state = primera_fase;
+			}
+			else
+			{
+				current_state = verificacion;
+			}
+			break;
+		}
+	}
+    return 0;
+}
+}
+int Hibernar()
+{
+	cout << "Hibernando\n";
+	return 0;
+}
