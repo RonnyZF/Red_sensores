@@ -7,6 +7,11 @@
 #define RFM69_RST     4
 #define LED           13
 #endif
+
+int RFM69_CS  =    8 ;//configuracion de los puertos
+int RFM69_INT =    7;
+int RFM69_RST =    4;
+int LED       =    13;
 /*variables para estados*/
 int alarma = 0;
 int mio = 0;
@@ -77,6 +82,24 @@ int mac;
 
 enum state { primera_fase, segunda_fase, escuchar, verificacion };
 enum state current_state = primera_fase;
+
+/* Transferencia */
+char data[5];
+char PT_st[4];
+char CTS_st [5];
+char RTS_st [5];
+char ACK_IN_st [3];
+char ACK_OUT_st [3];
+char TRAMA_st [5]; // Trama de alarma
+int ID_NODE = {10}; // ID del nodo actual
+int ID_NODE_IN = {20}; // ID del nodo escuchado
+int contador_pr = {0}; // contador del primer estado de espera
+int contador_s = {0}; // contador del segundo estado de espera
+int contador_t = {0}; // contador del tercer estado de espera
+int contador_c = {0}; // contador del cuarto estado de espera
+
+enum state_st {primer_estado, segundo_estado, tercer_estado, cuarto_estado};
+enum state_st current_state_st = primer_estado;
 
 /*COMPRESION*/
 void setup() {
@@ -503,6 +526,126 @@ int peticion_trama()
         }
     }
     return 0;
+  }
+}
+
+
+void transf_datos()
+{
+  while (current_state_st != cuarto_estado)
+  {
+    switch (current_state_st)
+    {
+      case primer_estado:
+      {
+      if (PT_st != 0)
+      {
+       if (CTS_st != 0 or RTS_st != 0) // si CTS o RTS estan activos
+       {
+        if (contador_pr == 3)
+        {
+          // LINEA HIBERNACIÓN
+          contador_pr = 0;
+        }
+        else
+        delay(10); // tiempo de espera para trasmisión
+        current_state_st = primer_estado;
+        contador_pr = contador_pr +1;
+       }
+       if (ID_NODE_IN < (ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración
+       {
+        ID_NODE = 30; // Cambio de nodo si se escucha uno menor
+       }
+       else
+       {
+        if (ID_NODE_IN == ID_NODE-1)
+        {
+          ID_NODE = 20; // Nodo actual
+          current_state_st = segundo_estado;
+          contador_p = 0;
+        }
+       }
+      }
+      else 
+      {
+        // regreso al estado de descubrimiento de red no borra memoria de alarmas
+      }
+      break;
+    }
+
+    case segundo_estado:
+    {
+      delay(rand()%20); // espera un tiempo aleatorio
+      if (RTS_st != 0 or CTS_st !=0)
+      {
+        if (contador_s == 3)
+        {
+          // Regreso al estado de HIBERNACIÓN
+          contador_s = 0;
+          current_state_st = segundo_estado;
+        }
+        else
+        {
+          contador_s = contador_s +1;
+          current_state_st = primer_estado;
+        }
+      }
+      else
+      {
+        contador_s = 0;
+        current_state_st = tercer_estado;
+      }
+      break;
+    }
+    case tercer_estado:
+    {
+      if (CTS_st != 0)
+      {
+        current_state_st = cuarto_estado;
+        contador_t = 0;
+      }
+      else if (CTS_st == 0)
+      {
+        if (contador_t == 3)
+        {
+          // Pasa a modo Hibernación
+          contador_t = 0;
+        }
+        else
+        {
+          contador_t = contador_t +1;
+          current_state_st = primer_estado;
+        }
+      }
+      break;
+    }
+    case cuarto_estado:
+    {
+      uint8_t data = TRAMA_st; // este es un mensaje que envian
+        rf69.send(data, sizeof(data)); // asi se envia un dato
+      ACK_OUT_st ; // envio de trama ACK
+      delay(10);
+      if (ACK_IN_st == ACK_OUT_st)
+      {
+        TRAMA_st; // vacio de trama de envio
+        // pasar a HIBERNACIÓN
+      }
+      else
+      {
+        if(contador_c == 3)
+        {
+          // PASO a HIBERNACIÓN
+          contador_c = 0;
+        }
+        else
+        {
+          current_state_st = cuarto_estado;
+          contador_c = contador_c +1;
+        }
+      }
+      break;
+    }
+    }
   }
 }
 
