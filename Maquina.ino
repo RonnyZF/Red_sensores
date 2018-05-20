@@ -562,20 +562,20 @@ void transf_datos{
     case segundo_estado:
     {
       delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
-      if (RTS_st != 0 or CTS_st !=0){
+      if (CTS_st !=0){
               //Verificar que el CTS proviene del nodo que escucho la trama PT
             if (contador_s == 3){
               // Regreso al estado de HIBERNACIÓN
-              Estado=0;
-              return;
+              contador_s = 0;
+              return
             }
             else{
               contador_s = contador_s +1;
               current_state_st = primer_estado;
             }
       }
-      else
-      {
+      else {
+        //Se envia la trama RTS
         contador_s = 0;
         current_state_st = tercer_estado;
       }
