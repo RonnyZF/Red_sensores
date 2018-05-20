@@ -549,8 +549,9 @@ void transf_datos()
        {
         if (contador_pr == 3)
         {
-          // LINEA HIBERNACIÓN
+           Estado=0;
           contador_pr = 0;
+          return;
         }
         else
         delay(10); // tiempo de espera para trasmisión
