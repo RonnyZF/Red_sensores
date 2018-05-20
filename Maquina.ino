@@ -564,7 +564,7 @@ void transf_datos{
   
     case segundo_estado:
     {
-      delay((rand() % 100 + 1)*B) ; // espera un tiempo aleatorio
+      delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
       if (RTS_st != 0 or CTS_st !=0)
       {
         if (contador_s == 3)
