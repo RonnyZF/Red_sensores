@@ -171,7 +171,7 @@ void loop() {
       }
       break;
     case 1:
-    peticion_trama();
+      nivel();
       Estado = 0;
       break;
     case 2:
@@ -544,15 +544,15 @@ void transf_datos{
             current_state_st = primer_estado;
         }
        else if (PT_st != 0){
-           if (ID_NODE_IN < (ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
+           if (ID_NODE_IN == ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
-             ID_NODE = 30; // Cambio de nodo si se escucha uno menor
+             current_state_st = segundo_estado;
+             return;// Cambio de nodo si se escucha uno menor
            }
            else{
-            if (ID_NODE_IN == ID_NODE-1){
-            ID_NODE = 20; // Nodo actual
-            current_state_st = segundo_estado;
-            contador_p = 0;}
+             Estado=1;
+             delay(10);
+             return;
           }
        }
           else {
