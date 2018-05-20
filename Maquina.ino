@@ -545,7 +545,8 @@ void transf_datos{
         }
        else if (PT_st != 0){
            if (ID_NODE_IN < (ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
-              ID_NODE = 30; // Cambio de nodo si se escucha uno menor
+           { 
+             ID_NODE = 30; // Cambio de nodo si se escucha uno menor
            }
            else{
             if (ID_NODE_IN == ID_NODE-1){
@@ -553,6 +554,7 @@ void transf_datos{
             current_state_st = segundo_estado;
             contador_p = 0;}
           }
+       }
           else {
         // regreso al estado de descubrimiento de red no borra memoria de alarmas
           }
