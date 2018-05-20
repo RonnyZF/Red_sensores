@@ -565,6 +565,8 @@ void transf_datos{
       escucha(2*B);
       if (CTS_st !=0){
               //Verificar que el CTS proviene del nodo que escucho la trama PT
+              //Comparar el byte 2 de la trama PT recivida en el estado enterior con el 
+              //byte 2 de la trama CTS
             if (contador_s == 3){
               // Regreso al estado de HIBERNACIÓN
               contador_s = 0;
