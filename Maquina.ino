@@ -549,6 +549,7 @@ void transf_datos{
            if (ID_NODE_IN == ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
              current_state_st = segundo_estado;
+             pt_anterior=TRAMA[2];
              return;// Cambio de nodo si se escucha uno menor
            }
        }
@@ -567,6 +568,7 @@ void transf_datos{
               //Verificar que el CTS proviene del nodo que escucho la trama PT
               //Comparar el byte 2 de la trama PT recivida en el estado enterior con el 
               //byte 2 de la trama CTS
+        if(pt_anterior==TRAMA[2]){
             if (contador_s == 3){
               // Regreso al estado de HIBERNACIÓN
               contador_s = 0;
@@ -576,6 +578,7 @@ void transf_datos{
               contador_s = contador_s +1;
               current_state_st = primer_estado;
             }
+        }
       }
       else {
         //Se envia la trama RTS
