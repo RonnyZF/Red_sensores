@@ -568,12 +568,10 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local){
       delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
       escucha(2*B);
       if (CTS_st !=0){
-              //Verificar que el CTS proviene del nodo que escucho la trama PT
-              //Comparar el byte 2 de la trama PT recivida en el estado enterior con el 
-              //byte 2 de la trama CTS
-        if(NIVEL_ADM_emisor==TRAMA[2]){
+
+        if(MAC_local==TRAMA[5]){ // Se compara la MAC_local con la MAC_del_destinatario para saber si el CTS es para el nodo.
             if (contador_s == 3){
-              // Regreso al estado de HIBERNACIÓN
+              //Regreso al estado de HIBERNACIÓN
               contador_s = 0;
               return
             }
@@ -592,28 +590,23 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local){
     case tercer_estado:
     {
       if (CTS_st != 0) {
-         MAC_destinatario=TRAMA[5];
-        
-        if (MAC_destinatario==MAC_local){
+        if (TRAMA[5]==MAC_local){//Se compara la MAC local con la MAC_del_destinatario en la CTS
             current_state_st = cuarto_estado;
             contador_t = 0;
           }
       }
-      else if (CTS_st == 0)
-      {
-        if (contador_t == 3)
-        {
+      else if (CTS_st == 0) {
+        if (contador_t == 3) {
           // Pasa a modo Hibernación
           contador_t = 0;
         }
-        else
-        {
+        else {
           contador_t = contador_t +1;
           current_state_st = primer_estado;
         }
       }
-      break;
     }
+    
     case cuarto_estado:
     {
       uint8_t data = TRAMA_st; // este es un mensaje que envian
