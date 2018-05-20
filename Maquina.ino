@@ -544,18 +544,15 @@ void transf_datos{
             current_state_st = primer_estado;
         }
        else if (PT_st != 0){
+           //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
+         
            if (ID_NODE_IN == ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
              current_state_st = segundo_estado;
              return;// Cambio de nodo si se escucha uno menor
            }
-           else{
-             Estado=1;
-             delay(10);
-             return;
-          }
        }
-          else {
+       else {
         // regreso al estado de descubrimiento de red no borra memoria de alarmas
           }
       break;
