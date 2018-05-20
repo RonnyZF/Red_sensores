@@ -580,7 +580,6 @@ void transf_datos{
         contador_s = 0;
         current_state_st = tercer_estado;
       }
-      break;
     }
     case tercer_estado:
     {
