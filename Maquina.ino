@@ -541,7 +541,7 @@ void transf_datos{
       case primer_estado:{
          if (CTS_st != 0 or RTS_st != 0){ // si CTS o RTS estan activos
             delay(10); // tiempo de espera para trasmisión
-            current_state_st = primer_estado;
+            //current_state_st = primer_estado; Primer estado de la maquina general
         }
        else if (PT_st != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
@@ -562,19 +562,16 @@ void transf_datos{
     case segundo_estado:
     {
       delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
-      if (RTS_st != 0 or CTS_st !=0)
-      {
-        if (contador_s == 3)
-        {
-          // Regreso al estado de HIBERNACIÓN
-          contador_s = 0;
-          current_state_st = segundo_estado;
-        }
-        else
-        {
-          contador_s = contador_s +1;
-          current_state_st = primer_estado;
-        }
+      if (RTS_st != 0 or CTS_st !=0){
+              //Verificar que el CTS proviene del nodo que escucho la trama PT
+            if (contador_s == 3){
+              // Regreso al estado de HIBERNACIÓN
+              contador_s = 0;
+            }
+            else{
+              contador_s = contador_s +1;
+              current_state_st = primer_estado;
+            }
       }
       else
       {
