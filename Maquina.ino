@@ -566,7 +566,8 @@ void transf_datos{
               //Verificar que el CTS proviene del nodo que escucho la trama PT
             if (contador_s == 3){
               // Regreso al estado de HIBERNACIÓN
-              contador_s = 0;
+              Estado=0;
+              return;
             }
             else{
               contador_s = contador_s +1;
