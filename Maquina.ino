@@ -535,21 +535,23 @@ int peticion_trama()
 }
 
 
-void transf_datos{
-  while (current_state_st != cuarto_estado)  {
+void transf_datos(char NIVEL_ADM, char TRAMA){
+  while (current_state_st != cuarto_estado) {
     switch (current_state_st){
       case primer_estado:{
+        
          if (CTS_st != 0 or RTS_st != 0){ // si CTS o RTS estan activos
             delay(10); // tiempo de espera para trasmisión
             //current_state_st = primer_estado; Primer estado de la maquina general
         }
        else if (PT_st != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
+           MAC_emisor=TRAMA[2];
+           NIVEL_ADM_emisor = TRAMA[3];
          
-           if (ID_NODE_IN == ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
+           if (NIVEL_ADM_emisor == NIVEL_ADM-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
              current_state_st = segundo_estado;
-             pt_anterior=TRAMA[2];
              return;// Cambio de nodo si se escucha uno menor
            }
        }
