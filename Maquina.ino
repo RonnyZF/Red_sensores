@@ -1,6 +1,10 @@
-#include <Adafruit_SleepyDog.h>
+//defines e includes
+#include <SPI.h>
 #include <RH_RF69.h>
+#include <Adafruit_SleepyDog.h>
 #define RF69_FREQ 915.0
+
+
 #if defined (__AVR_ATmega32U4__) // Feather 32u4 w/Radio
 #define RFM69_CS      8 //configuracion de los puertos
 #define RFM69_INT     7
@@ -8,10 +12,10 @@
 #define LED           13
 #endif
 
-int RFM69_CS  =    8 ;//configuracion de los puertos
-int RFM69_INT =    7;
-int RFM69_RST =    4;
-int LED       =    13;
+
+
+
+
 /*variables para estados*/
 int alarma = 0;
 int mio = 0;
@@ -55,7 +59,6 @@ RH_RF69 rf69(RFM69_CS, RFM69_INT);
 int16_t packetnum = 0;  //numero de paquetes que se envian
 
 /*COMPRESION*/
-
 int XC = 0;
 int LC = 0;
 int TC = 0;
@@ -158,51 +161,42 @@ void loop() {
     case 0:
       if (alarma == 0)/* busca si tiene alarmas*/
       {
+        hibernacion(cont,alarma);
         Estado = 1;
       }
       if (alarma == 1)/* si hay alarmas va a ;a peticion */
       {
+        hibernacion(cont,alarma);
         Estado = 3;
       }
       break;
     case 1:
-      Estado = 2;
+    peticion_trama();
+      Estado = 0;
       break;
     case 2:
-      Estado = 3;
+      Estado = 0;
       break;
     case 3:
       if (RTS_reci == 1)/* busca si tiene alarmas*/
       {
+        peticion_trama();
         Estado = 4;
       }
       if (RTS_reci == 0)/* si hay alarmas va a ;a peticion */
       {
+        peticion_trama();
         Estado = 9;
       }
       break;
     case 4:
-      Estado = 5;
+     peticion_trama();
       break;
     case 5:
-      if (rec_alarma == 0)
-      {
-        Estado = 3;
-      }
-      if (rec_alarma == 1)
-      {
-        Estado = 6;
-      }
+      peticion_trama();
       break;
     case 6:
-      if (CHECK == 1)
-      {
-        Estado = 6;
-      }
-      if (CHECK == 0)
-      {
-        Estado = 7;
-      }
+      peticion_trama();
       break;
     case 7:
       Estado = 3;
@@ -320,7 +314,7 @@ void hibernacion(int cont, int alarm) {
   {
     if (conta >= 20)
     {
-      // Mandar hacia descubrimiento de nivel de pertenencia
+      return;
     }
     if (conta <= 20)
     {
@@ -328,14 +322,14 @@ void hibernacion(int cont, int alarm) {
       hibernacion(cont, alarm);
     }
   }
-  if (alarm == 1)
+  if (alarm != 0)
   {
-    //Mandar a primera fase de peticion de trama
+    return;
   }
 
 }
 
-void escucha()  {
+void escucha(int tiempoenmilis)  {
   if (rf69.available()) {
 
     while (millis() <= (start1 + tiempoenmilis)) {
@@ -455,7 +449,7 @@ int peticion_trama()
     {
       case primera_fase:
         {
-          //escucha(2 * B);
+          escucha(2 * B);
           if (CTS == 0 and RTS == 0) // si CTS o RTS estan activos
           {
             PT1[0] = 240;
@@ -465,12 +459,15 @@ int peticion_trama()
             rf69.send(PT1, sizeof(PT1)); // asi se envia un dato
 
             //oPT = 1; ///enviar PT, send rx.
-            //escucha(2 * B);
+            escucha(2*B);
             if (RTS != 0){
               current_state = segunda_fase;
+              Estado=4;
+              return;
             }
             else
-            {}           //   hibernacion();
+            Estado=0;
+            return;         //   hibernacion();
           }
           break;
         }
@@ -479,7 +476,7 @@ int peticion_trama()
 
       case segunda_fase:
         {
-          //escucha(2 * B);
+          escucha(2 * B);
           if (CTS == 0)
           {
             CTS[0] = 243;
@@ -489,20 +486,26 @@ int peticion_trama()
             CTS[4] = mac;
             rf69.send(CTS, sizeof(CTS));
             //oCTS = 1;
-            current_state = segunda_fase;
+            current_state = escuchar;
+            Estado=5;
+            return;
           }
           break;
         }
       case escuchar:
         {
-          //escucha(2 * B); //tiempo de espera 2B
+          escucha(2*B); //tiempo de espera 2B
           if (TRAMA != 0) {
             current_state = verificacion;
+            Estado=6;
+            return;
           }
           else  {
             //TRAMA=000;
             ///strncpy(TRAMA, "00000", 5);
             current_state = primera_fase;
+            Estado=3;
+            return;
           }
           break;
         }
@@ -514,13 +517,15 @@ int peticion_trama()
           //ACK_OUT = 1232;
           //strncpy(ACK_OUT, "1232", 4);
           Malarma[0] = TRAMA[0];
-          //escucha(2*B); //tiempo de espera 2B
+          escucha(2*B); //tiempo de espera 2B
 
           if (Malarma == TRAMA)
           {
 
             //guardar trama en la pila;
             current_state = primera_fase;
+            Estado=3;
+            return;
           }
           break;
         }
@@ -648,4 +653,3 @@ void transf_datos()
     }
   }
 }
-
