@@ -583,10 +583,11 @@ void transf_datos{
     }
     case tercer_estado:
     {
-      if (CTS_st != 0)
-      {
-        current_state_st = cuarto_estado;
-        contador_t = 0;
+      if (CTS_st != 0) {
+        //if (Compara direccion mac del destinatario con la direccion mac propia){
+            current_state_st = cuarto_estado;
+            contador_t = 0;
+          //}
       }
       else if (CTS_st == 0)
       {
