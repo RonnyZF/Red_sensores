@@ -545,7 +545,7 @@ void transf_datos()
       {
       if (PT_st != 0)
       {
-       if (CTS_st != 0 or RTS_st != 0) // si CTS o RTS estan activos
+      if (CTS_st != 0 or RTS_st != 0) // si CTS o RTS estan activos
        {
         if (contador_pr == 3)
         {
