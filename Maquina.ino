@@ -535,7 +535,8 @@ int peticion_trama()
 }
 
 
-void transf_datos(char NIVEL_ADM, char TRAMA){
+void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local){
+  
   while (current_state_st != cuarto_estado) {
     switch (current_state_st){
       case primer_estado:{
@@ -546,7 +547,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA){
         }
        else if (PT_st != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
-           MAC_emisor=TRAMA[2];
+           MAC_emisor=TRAMA[4];
            NIVEL_ADM_emisor = TRAMA[3];
          
            if (NIVEL_ADM_emisor == NIVEL_ADM-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
@@ -570,7 +571,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA){
               //Verificar que el CTS proviene del nodo que escucho la trama PT
               //Comparar el byte 2 de la trama PT recivida en el estado enterior con el 
               //byte 2 de la trama CTS
-        if(pt_anterior==TRAMA[2]){
+        if(NIVEL_ADM_emisor==TRAMA[2]){
             if (contador_s == 3){
               // Regreso al estado de HIBERNACIÓN
               contador_s = 0;
@@ -591,10 +592,12 @@ void transf_datos(char NIVEL_ADM, char TRAMA){
     case tercer_estado:
     {
       if (CTS_st != 0) {
-        //if (Compara direccion mac del destinatario con la direccion mac propia){
+         MAC_destinatario=TRAMA[5];
+        
+        if (MAC_destinatario==MAC_local){
             current_state_st = cuarto_estado;
             contador_t = 0;
-          //}
+          }
       }
       else if (CTS_st == 0)
       {
