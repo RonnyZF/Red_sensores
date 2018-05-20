@@ -562,6 +562,7 @@ void transf_datos{
     case segundo_estado:
     {
       delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
+      escucha(2*B);
       if (CTS_st !=0){
               //Verificar que el CTS proviene del nodo que escucho la trama PT
             if (contador_s == 3){
