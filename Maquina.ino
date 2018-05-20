@@ -539,29 +539,25 @@ void transf_datos()
 {
   while (current_state_st != cuarto_estado)
   {
-    switch (current_state_st){
+        switch (current_state_st){
       case primer_estado:{
       if (PT_st != 0)
       {
-        if (CTS_st != 0 or RTS_st != 0) // si CTS o RTS estan activos
-       {
-          if (contador_pr == 3){
-            Estado=0;
-            contador_pr = 0;
-            return;}
-          else
-            delay(10); // tiempo de espera para trasmisión
-            current_state_st = primer_estado;
-            contador_pr = contador_pr +1;}
-       if (ID_NODE_IN < (ID_NODE-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
+        if (ID_NODE_IN < (ID_NODE-1)){ // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
           ID_NODE = 30; // Cambio de nodo si se escucha uno menor
           }
-       else{
-          if (ID_NODE_IN == ID_NODE-1){
-            ID_NODE = 20; // Nodo actual
+          else{
+            if (ID_NODE_IN == ID_NODE-1){
+              ID_NODE = 20; // Nodo actual
             current_state_st = segundo_estado;
             contador_p = 0;}
           }
+      }
+      if (CTS_st != 0 or RTS_st != 0) // si CTS o RTS estan activos
+      {
+        delay(10); // tiempo de espera para trasmisión
+            current_state_st = primer_estado;
+            contador_pr = contador_pr +1;
       }
       else 
       {
