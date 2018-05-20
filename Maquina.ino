@@ -535,7 +535,7 @@ int peticion_trama()
 }
 
 
-void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local){
+void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int ){
   
   while (current_state_st != cuarto_estado) {
     switch (current_state_st){
@@ -611,7 +611,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local){
     {
       uint8_t data = TRAMA_st; // este es un mensaje que envian
         rf69.send(data, sizeof(data)); // asi se envia un dato
-      ACK_OUT_st ; // envio de trama ACK
+      // CHECK_SUM_enviado=TRAMA_enviada[6]
       delay(10);
       if (ACK_IN_st == ACK_OUT_st)
       {
