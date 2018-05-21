@@ -286,19 +286,19 @@ void loop() {
 int nivel(void)
 {
   while (millis() < start + 600) {
-    if (thread_level < level_ADM) {
-      level_ADM = thread_level;
+    if (thread_level < NIVEL_ADM) {
+      NIVEL_ADM = thread_level;
     }
   }
-  level_ADM++;
+  NIVEL_ADM++;
   /*Nivel de Pertenencia AMD*/
-  x = level_ADM % (MCL * 2);
+  x = NIVEL_ADM % (MCL * 2);
   y = (MCL * 2) - x;
 
   if (x < y)
-    level_AMD = x;
+    NIVEL_AMD = x;
   else
-    level_AMD = y;
+    NIVEL_AMD = y;
   if (x == 0)
     cluster = 1;
 }
