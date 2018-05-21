@@ -462,6 +462,7 @@ int peticion_trama()
             }
             else{
             //Paso a hibernación
+            //Estado=4;
             return;   
             }
         }
