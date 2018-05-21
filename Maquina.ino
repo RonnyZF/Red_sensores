@@ -493,7 +493,8 @@ int peticion_trama()
 void prim_estado(){
  if (ctse != 0 or rtse != 0){ // si CTS o RTS estan activos
             delay(10); // tiempo de espera para trasmisión
-            Estado = 11; //Primer estado de la maquina general
+            Estado = 11; //Primer estado de la maquina 
+            return;
         }
        else if (pte != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
@@ -516,13 +517,14 @@ void seg_estado(){
 
         if(MAC_local==TRAMA[5]){ // Se compara la MAC_local con la MAC_del_destinatario para saber si el CTS es para el nodo.
             if (contador_s == 3){
-              //Regreso al estado de HIBERNACIÓN
+              Estado=0;//Regreso al estado de HIBERNACIÓN
               contador_s = 0;
               return;
             }
             else{
               contador_s = contador_s +1;
               Estado = 11;
+              return;
             }
         }
       }
@@ -530,6 +532,7 @@ void seg_estado(){
         //Se envia la trama RTS
         contador_s = 0;
         Estado = 13;
+        return;
       }
 }
 
@@ -538,16 +541,19 @@ void terc_estado(){
         if (TRAMA[5]==MAC_local){//Se compara la MAC local con la MAC_del_destinatario en la CTS
             Estado = 14;
             contador_t = 0;
+            return;
           }
       }
       else if (ctse == 0) {
         if (contador_t == 3) {
-          // Pasa a modo Hibernación
+          Estado=0;// Pasa a modo Hibernación
           contador_t = 0;
+          return;
         }
         else {
           contador_t = contador_t +1;
           Estado = 11;
+          return;
         }
       } 
 }
@@ -565,14 +571,16 @@ void cuar_estado(){
          CHECK_SUM_recibido=TRAMA[2];
          if (CHECK_SUM_recibido==CHECK_SUM_enviado){
          //limpia memoria
-         // pasa a HIBERNACIÓN
+         Estado=0;// pasa a HIBERNACIÓN
          }
         else {
          Estado = 14;
+         return;
         }
       }
       else {
         Estado=0;
+        return;
         //Pasa a hibernacion
        } 
 }
