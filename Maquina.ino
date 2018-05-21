@@ -46,18 +46,29 @@ int conth = 0;
 int alarm = 0;
 int conta = 0;
 int start1 = millis();
-
+int NIVEL_ADM;
+int NIVEL_AMD;
 //escucha
 int tiempoenmilis;
+int MAC_destinatario;
+int MAC_emisor;
+int NIVEL_ADM_emisor;
+int CHECK_SUM_recibido;
+int CHECK_SUM_enviado;
 int mace;
 int pte;
 int ctse;
 int rtse;
 int acke;
 int alarmae;
+uint8_t buf[RH_RF69_MAX_MESSAGE_LEN]; // asi capta el mensaje
+uint8_t len = sizeof(buf); // len es el tamaÃ±o del mensaje
+
+
+
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 int16_t packetnum = 0;  //numero de paquetes que se envian
-
+int MAC_destinario;
 /*COMPRESION*/
 int XC = 0;
 int LC = 0;
@@ -69,7 +80,7 @@ int cambioc2 = 0;
 int Alarmac;
 int NODOC;
 int TIPOC;
-
+int MAC_local;
 /*PETICION TRAMA*/
 
 int B = 5;
@@ -82,6 +93,7 @@ char Malarma[1];
 char TRAMA[1]; // trama de alarma
 int contador_p = {0};
 int mac;
+int CHECK_SUM;
 
 enum state { primera_fase, segunda_fase, escuchar, verificacion };
 enum state current_state = primera_fase;
@@ -153,7 +165,6 @@ void setup() {
   tercer estado de espera=13
   cuarto estado de espera =14
   se conprimen las alarmas  se enmvian hacia el siguente estado de ADM=15
-
 */
 void loop() {
   switch (Estado)
@@ -504,9 +515,9 @@ int peticion_trama()
     }
   }
 }
+}
 
-
-void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int ){
+void transf_datos(){
   
   while (current_state_st != cuarto_estado) {
     switch (current_state_st){
@@ -521,7 +532,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
            MAC_emisor=TRAMA[4];
            NIVEL_ADM_emisor = TRAMA[3];
          
-           if (NIVEL_ADM_emisor == NIVEL_ADM-1)) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
+           if (NIVEL_ADM_emisor == NIVEL_ADM-1) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
              current_state_st = segundo_estado;
              return;// Cambio de nodo si se escucha uno menor
@@ -532,7 +543,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
           }
       break;
     }
-  }
+
   
     case segundo_estado:
     {
@@ -544,7 +555,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
             if (contador_s == 3){
               //Regreso al estado de HIBERNACIÓN
               contador_s = 0;
-              return
+              return;
             }
             else{
               contador_s = contador_s +1;
@@ -605,5 +616,5 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
 
     }
     }
-  }
 }
+
