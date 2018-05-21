@@ -95,17 +95,17 @@ int contador_p = {0};
 int mac;
 int CHECK_SUM;
 
+int checksum_trama;
+int len_trama;
+int pos_trama;
+
+
 enum state { primera_fase, segunda_fase, escuchar, verificacion };
 enum state current_state = primera_fase;
 
+
 /* Transferencia */
 char data[5];
-char PT_st[4];
-char CTS_st [5];
-char RTS_st [5];
-char ACK_IN_st [3];
-char ACK_OUT_st [3];
-char TRAMA_st [5]; // Trama de alarma
 int ID_NODE = {10}; // ID del nodo actual
 int ID_NODE_IN = {20}; // ID del nodo escuchado
 int contador_pr = {0}; // contador del primer estado de espera
@@ -235,55 +235,16 @@ void loop() {
     case 10:
       Estado = 11;
     case 11:
-      if (PT == 1)
-      {
-        Estado = 12;
-      }
-      if (PT == 0)
-      {
-        Estado = 1;
-      }
+    prim_estado();
       break;
     case 12:
-      if (RTS_env == 0 && cont <= 3)
-      {
-        Estado = 11;
-      }
-      if (RTS_env == 0 && cont >= 3)
-      {
-        Estado = 0;
-      }
-      if (RTS_env == 1)
-      {
-        Estado = 13;
-      }
+    seg_estado();
       break;
     case 13:
-      if (CTS_reci == 0 && cont <= 3)
-      {
-        Estado = 11;
-      }
-      if (CTS_reci == 0 && cont >= 3)
-      {
-        Estado = 0;
-      }
-      if (CTS_reci == 1)
-      {
-        Estado = 14;
-      }
+    terc_estado();
+    break;
     case 14:
-      if (Trama_ack == 1)
-      {
-        Estado = 0;
-      }
-      if (Trama_ack == 0)
-      {
-        Estado = 0;
-      }
-      if (Trama_ack == 2)
-      {
-        Estado = 14;
-      }
+    cuar_estado();
       break;
     case 15:
       Estado = 11;
@@ -449,6 +410,17 @@ void compresion() {
 }
 
 
+void gen_ACK(char* TRAMA){
+  if (TRAMA != 0){
+    pos_trama = len_trama - 1;
+    checksum_trama = 0;    
+    while (pos_trama >= 0){
+      checksum_trama= TRAMA[pos_trama] + checksum_trama;
+      pos_trama = pos_trama - 1;
+      }
+  } 
+  return;
+}
 
 int peticion_trama()
 {
@@ -500,8 +472,9 @@ int peticion_trama()
         }
       case verificacion:
         {
+          gen_ACK(TRAMA);
           ACK_OUT[0] = 245;
-          ACK_OUT[1] = CHECK_SUM;
+          ACK_OUT[1] = checksum_trama;
           ACK_OUT[2] = MAC_destinario; //REVISAR si es la MAC local o la del destinatario??
           escucha(2*B); //tiempo de espera 2B
           if (alarmae == 0){
@@ -517,15 +490,10 @@ int peticion_trama()
 }
 }
 
-void transf_datos(){
-  
-  while (current_state_st != cuarto_estado) {
-    switch (current_state_st){
-      case primer_estado:{
-        
-         if (ctse != 0 or rtse != 0){ // si CTS o RTS estan activos
+void prim_estado(){
+ if (ctse != 0 or rtse != 0){ // si CTS o RTS estan activos
             delay(10); // tiempo de espera para trasmisión
-            //current_state_st = primer_estado; Primer estado de la maquina general
+            Estado = 11; //Primer estado de la maquina general
         }
        else if (pte != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
@@ -534,20 +502,15 @@ void transf_datos(){
          
            if (NIVEL_ADM_emisor == NIVEL_ADM-1) // si el ID del PT escuchado es menor al ID del nodo reconfiguración{
            { 
-             current_state_st = segundo_estado;
+             Estado = 12;
              return;// Cambio de nodo si se escucha uno menor
            }
        }
-       else {
-        // regreso al estado de descubrimiento de red no borra memoria de alarmas
-          }
-      break;
-    }
+       return; 
+}
 
-  
-    case segundo_estado:
-    {
-      delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
+void seg_estado(){
+   delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
       escucha(2*B);
       if (ctse !=0){
 
@@ -559,21 +522,21 @@ void transf_datos(){
             }
             else{
               contador_s = contador_s +1;
-              current_state_st = primer_estado;
+              Estado = 11;
             }
         }
       }
       else {
         //Se envia la trama RTS
         contador_s = 0;
-        current_state_st = tercer_estado;
+        Estado = 13;
       }
-    }
-    case tercer_estado:
-    {
-      if (ctse != 0) {
+}
+
+void terc_estado(){
+  if (ctse != 0) {
         if (TRAMA[5]==MAC_local){//Se compara la MAC local con la MAC_del_destinatario en la CTS
-            current_state_st = cuarto_estado;
+            Estado = 14;
             contador_t = 0;
           }
       }
@@ -584,14 +547,14 @@ void transf_datos(){
         }
         else {
           contador_t = contador_t +1;
-          current_state_st = primer_estado;
+          Estado = 11;
         }
-      }
-    }
-    
-    case cuarto_estado:
-    {
-      char data [3] ; // Esta es la TRAMA_enviada de alarma que se envía
+      } 
+}
+
+void cuar_estado(){
+  
+ char data [3] ; // Esta es la TRAMA_enviada de alarma que se envía
       data[0]=245;
       data[1]=TRAMA[len-1];
       data[2]=MAC_emisor;
@@ -605,16 +568,11 @@ void transf_datos(){
          // pasa a HIBERNACIÓN
          }
         else {
-         current_state_st = cuarto_estado;
+         Estado = 14;
         }
       }
       else {
         Estado=0;
         //Pasa a hibernacion
-       }
-      }
-
-    }
-    }
+       } 
 }
-
