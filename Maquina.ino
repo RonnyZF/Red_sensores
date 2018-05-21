@@ -609,29 +609,26 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
     
     case cuarto_estado:
     {
-      uint8_t data = TRAMA_st; // este es un mensaje que envian
-        rf69.send(data, sizeof(data)); // asi se envia un dato
-      // CHECK_SUM_enviado=TRAMA_enviada[6]
-      delay(10);
-      if (ACK_IN_st == ACK_OUT_st)
-      {
-        TRAMA_st; // vacio de trama de envio
-        // pasar a HIBERNACIÓN
-      }
-      else
-      {
-        if(contador_c == 3)
-        {
-          // PASO a HIBERNACIÓN
-          contador_c = 0;
-        }
-        else
-        {
-          current_state_st = cuarto_estado;
-          contador_c = contador_c +1;
+      uint8_t data = TRAMA_enviada; // Esta es la TRAMA_enviada de alarma que se envía
+        rf69.send(data, sizeof(data)); // asi se envia un dato 
+      // CHECK_SUM_enviado=TRAMA_enviada[6] //Se guarda el check_sum enviado
+      delay(10);//Escucha por una trama ACK
+      if (ACK_st != 0){
+         CHECK_SUM_recibido=TRAMA[2];
+         if (CHECK_SUM_recibido==CHECK_SUM_enviado){
+         //limpia memoria
+         // pasa a HIBERNACIÓN
+         }
+        else {
+         current_state_st = cuarto_estado;
         }
       }
-      break;
+      else {
+        delay(10);//espera un tiempo B
+        //Pasa a hibernacion
+       }
+      }
+
     }
     }
   }
