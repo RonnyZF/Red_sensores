@@ -441,8 +441,6 @@ void compresion() {
 
 int peticion_trama()
 {
-
-
   while (current_state != verificacion)
   {
     switch (current_state)
@@ -450,14 +448,13 @@ int peticion_trama()
       case primera_fase:
         {
           escucha(2 * B);
-          if (CTS == 0 and RTS == 0) // si CTS o RTS estan activos
+          if (ctse == 0 or rtse == 0) // si CTS o RTS estan activos ¿HAY QUE AGREGAR PT?
           {
             PT1[0] = 240;
             PT1[1] = 48;
-            PT1[2] = level_ADM;
-            PT1[3] = mac;
+            PT1[2] = NIVEL_ADM;
+            PT1[3] = MAC_local;
             rf69.send(PT1, sizeof(PT1)); // asi se envia un dato
-
             //oPT = 1; ///enviar PT, send rx.
             escucha(2*B);
             if (RTS != 0){
