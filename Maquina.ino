@@ -609,7 +609,10 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
     
     case cuarto_estado:
     {
-      uint8_t data = TRAMA_enviada; // Esta es la TRAMA_enviada de alarma que se envía
+      char data [3] ; // Esta es la TRAMA_enviada de alarma que se envía
+      data[0]=245;
+      data[1]=TRAMA[len-1];
+      data[2]=MAC_emisor;
         rf69.send(data, sizeof(data)); // asi se envia un dato 
       // CHECK_SUM_enviado=TRAMA_enviada[6] //Se guarda el check_sum enviado
       delay(10);//Escucha por una trama ACK
