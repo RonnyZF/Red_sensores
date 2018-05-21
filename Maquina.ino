@@ -462,7 +462,6 @@ int peticion_trama()
             }
             else{
             //Paso a hibernación
-            //Estado=4;
             return;   
             }
         }
@@ -482,40 +481,27 @@ int peticion_trama()
           escucha(2*B); //tiempo de espera 2B
           if (alarmae!= 0) {
             current_state = verificacion;
-            Estado=6;
-            return;
           }
           else  {
-            //TRAMA=000;
-            ///strncpy(TRAMA, "00000", 5);
-            current_state = primera_fase;
-            Estado=3;
+            //RETORNA A HIBERNACION
             return;
           }
-          break;
         }
       case verificacion:
         {
-          ACK_OUT[1] = 245;
-          ACK_OUT[2] = 245;
-          ACK_OUT[3] = 245;
-          //ACK_OUT = 1232;
-          //strncpy(ACK_OUT, "1232", 4);
-          Malarma[0] = TRAMA[0];
+          ACK_OUT[0] = 245;
+          ACK_OUT[1] = CHECK_SUM;
+          ACK_OUT[2] = MAC_destinario; //REVISAR si es la MAC local o la del destinatario??
           escucha(2*B); //tiempo de espera 2B
-
-          if (Malarma == TRAMA)
-          {
-
+          if (alarmae == 0){
             //guardar trama en la pila;
             current_state = primera_fase;
-            Estado=3;
-            return;
           }
-          break;
+          else { 
+            current_state = verificacion;
+          }
         }
     }
-    return 0;
   }
 }
 
