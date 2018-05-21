@@ -613,7 +613,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
         rf69.send(data, sizeof(data)); // asi se envia un dato 
       // CHECK_SUM_enviado=TRAMA_enviada[6] //Se guarda el check_sum enviado
       delay(10);//Escucha por una trama ACK
-      if (ACK_st != 0){
+      if (acke != 0){
          CHECK_SUM_recibido=TRAMA[2];
          if (CHECK_SUM_recibido==CHECK_SUM_enviado){
          //limpia memoria
@@ -624,7 +624,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
         }
       }
       else {
-        delay(10);//espera un tiempo B
+        Estado=0;
         //Pasa a hibernacion
        }
       }
