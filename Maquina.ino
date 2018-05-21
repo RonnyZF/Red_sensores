@@ -254,26 +254,42 @@ void loop() {
   }
 }
 
-/*Nivel de Pertenencia ADM*/
-int nivel(void)
-{
-  while (millis() < start + 600) {
-    if (thread_level < NIVEL_ADM) {
-      NIVEL_ADM = thread_level;
-    }
-  }
-  NIVEL_ADM++;
-  /*Nivel de Pertenencia AMD*/
-  x = NIVEL_ADM % (MCL * 2);
-  y = (MCL * 2) - x;
 
-  if (x < y)
-    NIVEL_AMD = x;
-  else
-    NIVEL_AMD = y;
-  if (x == 0)
-    cluster = 1;
+/*Nivel de Pertenencia ADM*/
+int descubrimiendo_nivel_ADM(){
+  escucha(2*B);
+  int NIVEL_ESCUCHADO = TRAMA[2];
+  if (pte != 0){ // si se escucha una trama PT
+         // while (millis() < start + 600) {
+            if (NIVEL_ESCUCHADO < NIVEL_ADM) {
+              NIVEL_ADM = NIVEL_ESCUCHADO+1;
+              
+            }
+          }
+
+   else{
+          Estado=0;//Regreso al estado de HIBERNACIÓN
+          return;
+    }
 }
+
+//int descubrimiendo_nivel_AMD(){    
+//    /*Nivel de Pertenencia AMD*/
+//    x = NIVEL_ADM % (MCL * 2);
+//    y = (MCL * 2) - x;
+//  
+//    if (x < y)
+//      NIVEL_AMD = x;
+//    else
+//      NIVEL_AMD = y;
+//    if (x == 0)
+//      cluster = 1;
+//  
+//else{
+//    Estado=0;//Regreso al estado de HIBERNACIÓN
+//    return;
+//}
+//}
 
 void hibernacion(int cont, int alarm) {
 
