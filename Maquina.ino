@@ -472,14 +472,15 @@ int peticion_trama()
             CTS[1] = NIVEL_AMD;
             CTS[2] = NIVEL_ADM;
             CTS[3] = TRAMA[3]; //Reenvia el tamaño de trama que recibió en el RTS
-            CTS[4] = mac;
+            CTS[4] = TRAMA[4];
+            MAC_destinatario = TRAMA[4];
             rf69.send(CTS, sizeof(CTS));
             current_state = escuchar;
         }
       case escuchar:
         {
           escucha(2*B); //tiempo de espera 2B
-          if (TRAMA != 0) {
+          if (alarmae!= 0) {
             current_state = verificacion;
             Estado=6;
             return;
