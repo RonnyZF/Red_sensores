@@ -466,18 +466,13 @@ int peticion_trama()
             return;   
             }
         }
-
-
-
       case segunda_fase:
         {
-          escucha(2 * B);
-          if (CTS == 0)
-          {
+          if (CTS == 0) {
             CTS[0] = 243;
-            CTS[1] = 0;
-            CTS[2] = level_ADM;
-            CTS[3] = 5; //Se define una trama de tamaÃ±o 5
+            CTS[1] = NIVEL_AMD;
+            CTS[2] = NIVEL_ADM;
+            CTS[3] = TRAMA[3]; //Se define una trama de tamaÃ±o 5
             CTS[4] = mac;
             rf69.send(CTS, sizeof(CTS));
             //oCTS = 1;
