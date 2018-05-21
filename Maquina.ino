@@ -541,11 +541,11 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
     switch (current_state_st){
       case primer_estado:{
         
-         if (CTS_st != 0 or RTS_st != 0){ // si CTS o RTS estan activos
+         if (ctse != 0 or rtse != 0){ // si CTS o RTS estan activos
             delay(10); // tiempo de espera para trasmisión
             //current_state_st = primer_estado; Primer estado de la maquina general
         }
-       else if (PT_st != 0){
+       else if (pte != 0){
            //Acá hay que separar la trama PT para sacar el ID_NODE_IN para compararlo con el ID_NODE
            MAC_emisor=TRAMA[4];
            NIVEL_ADM_emisor = TRAMA[3];
@@ -567,7 +567,7 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
     {
       delay((rand() % 9 + 2)*B) ; // espera un tiempo aleatorio
       escucha(2*B);
-      if (CTS_st !=0){
+      if (ctse !=0){
 
         if(MAC_local==TRAMA[5]){ // Se compara la MAC_local con la MAC_del_destinatario para saber si el CTS es para el nodo.
             if (contador_s == 3){
@@ -589,13 +589,13 @@ void transf_datos(char NIVEL_ADM, char TRAMA, char MAC_local, int Trama_ack, int
     }
     case tercer_estado:
     {
-      if (CTS_st != 0) {
+      if (ctse != 0) {
         if (TRAMA[5]==MAC_local){//Se compara la MAC local con la MAC_del_destinatario en la CTS
             current_state_st = cuarto_estado;
             contador_t = 0;
           }
       }
-      else if (CTS_st == 0) {
+      else if (ctse == 0) {
         if (contador_t == 3) {
           // Pasa a modo Hibernación
           contador_t = 0;
