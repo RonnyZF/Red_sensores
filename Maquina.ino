@@ -457,16 +457,13 @@ int peticion_trama()
             rf69.send(PT1, sizeof(PT1)); // asi se envia un dato
             //oPT = 1; ///enviar PT, send rx.
             escucha(2*B);
-            if (RTS != 0){
+            if (rtse != 0){
               current_state = segunda_fase;
-              Estado=4;
-              return;
             }
-            else
-            Estado=0;
-            return;         //   hibernacion();
-          }
-          break;
+            else{
+            //Paso a hibernación
+            return;   
+            }
         }
 
 
