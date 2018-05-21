@@ -468,19 +468,13 @@ int peticion_trama()
         }
       case segunda_fase:
         {
-          if (CTS == 0) {
             CTS[0] = 243;
             CTS[1] = NIVEL_AMD;
             CTS[2] = NIVEL_ADM;
-            CTS[3] = TRAMA[3]; //Se define una trama de tamaÃ±o 5
+            CTS[3] = TRAMA[3]; //Reenvia el tamaño de trama que recibió en el RTS
             CTS[4] = mac;
             rf69.send(CTS, sizeof(CTS));
-            //oCTS = 1;
             current_state = escuchar;
-            Estado=5;
-            return;
-          }
-          break;
         }
       case escuchar:
         {
