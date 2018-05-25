@@ -1,7 +1,7 @@
 //defines e includes
 #include <SPI.h>
 #include <RH_RF69.h>
-#include <Adafruit_SleepyDog.h>
+#include "LowPower.h"
 #define RF69_FREQ 915.0
 
 
@@ -13,7 +13,17 @@
 #endif
 
 
+uint8_t Alarma1=HIGH;
+uint8_t Alarma2=HIGH;
+uint8_t Alarma3=HIGH;
+uint8_t Alarma4=HIGH;
+char Pila_alarmas[2];
 
+int btn_1=0;
+int btn_2=1;
+int btn_3=2;
+int btn_4=3;
+int borrado;
 
 
 /*variables para estados*/
@@ -46,7 +56,7 @@ int conth = 0;
 int alarm = 0;
 int conta = 0;
 int start1 = millis();
-int NIVEL_ADM;
+int NIVEL_ADM=0;
 int NIVEL_AMD;
 //escucha
 int tiempoenmilis;
@@ -61,8 +71,6 @@ int ctse;
 int rtse;
 int acke;
 int alarmae;
-uint8_t buf[RH_RF69_MAX_MESSAGE_LEN]; // asi capta el mensaje
-uint8_t len = sizeof(buf); // len es el tamaÃ±o del mensaje
 
 
 
@@ -92,7 +100,7 @@ char ACK_OUT[3] ;
 char Malarma[1];
 char TRAMA[1]; // trama de alarma
 int contador_p = {0};
-int mac;
+int mac=24;
 int CHECK_SUM;
 
 int checksum_trama;
@@ -116,9 +124,31 @@ int contador_c = {0}; // contador del cuarto estado de espera
 enum state_st {primer_estado, segundo_estado, tercer_estado, cuarto_estado};
 enum state_st current_state_st = primer_estado;
 
+
+uint8_t buf[RH_RF69_MAX_MESSAGE_LEN]; // asi capta el mensaje
+uint8_t len = sizeof(buf); // len es el tamaÃ±o del mensaje
+
+
+int BASE=1;
+
+
+
 /*COMPRESION*/
 void setup() {
   Serial.begin(115200);
+  
+  pinMode(btn_1,INPUT_PULLUP);
+  pinMode(btn_2,INPUT_PULLUP);
+  pinMode(btn_3,INPUT_PULLUP);
+  pinMode(btn_4,INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt((btn_1)),Fuego,FALLING);
+  attachInterrupt(digitalPinToInterrupt((btn_2)),Moto_sierra,FALLING);
+  attachInterrupt(digitalPinToInterrupt((btn_3)),Disparo,FALLING);
+  attachInterrupt(digitalPinToInterrupt((btn_4)),AD,FALLING);
+
+
+  
   while (!Serial) ; // wait for Arduino Serial Monitor (native USB boards)
   Serial.begin(115200); // velocidad de baudios
   pinMode(LED, OUTPUT);     //led para mostrar comunicacion
@@ -167,151 +197,168 @@ void setup() {
   se conprimen las alarmas  se enmvian hacia el siguente estado de ADM=15
 */
 void loop() {
+Estado=0;
+alarma=0;
+if (BASE==0){
   switch (Estado)
   {
     case 0:
-      if (alarma == 0)/* busca si tiene alarmas*/
-      {
-        hibernacion(cont,alarma);
-        Estado = 1;
-      }
-      if (alarma == 1)/* si hay alarmas va a ;a peticion */
-      {
-        hibernacion(cont,alarma);
-        Estado = 3;
-      }
+      Serial.print("hola");
+      hibernacion();
+      Serial.print(Estado);
       break;
     case 1:
       nivel();
       Estado = 0;
+      Serial.print(Estado);
       break;
     case 2:
       Estado = 0;
+      Serial.print("aquino");
       break;
     case 3:
-      if (RTS_reci == 1)/* busca si tiene alarmas*/
-      {
-        peticion_trama();
-        Estado = 4;
-      }
-      if (RTS_reci == 0)/* si hay alarmas va a ;a peticion */
-      {
-        peticion_trama();
-        Estado = 9;
-      }
+      peticion_trama();
+      Serial.print(Estado);
       break;
     case 4:
      peticion_trama();
+     Serial.print(Estado);
       break;
     case 5:
       peticion_trama();
+      Serial.print(Estado);
       break;
     case 6:
       peticion_trama();
+      Serial.print(Estado);
       break;
     case 7:
       Estado = 3;
+      Serial.print(Estado);
       break;
     case 8:
       if (alarma_pila == 1)
       {
         Estado = 9;
+        Serial.print(Estado);
       }
       if (alarma_pila == 0)
       {
         Estado = 0;
+        Serial.print(Estado);
       }
       break;
     case 9:
       if (tramas_pila == 1)
       {
         Estado = 15;
+        Serial.print(Estado);
       }
       if (tramas_pila == 0)
       {
         Estado = 10;
+        Serial.print(Estado);
       }
       break;
     case 10:
       Estado = 11;
+      Serial.print(Estado);
     case 11:
     prim_estado();
+    Serial.print(Estado);
       break;
     case 12:
     seg_estado();
+    Serial.print(Estado);
       break;
     case 13:
     terc_estado();
+    Serial.print(Estado);
     break;
     case 14:
     cuar_estado();
+    Serial.print(Estado);
       break;
     case 15:
       Estado = 11;
+      Serial.print(Estado);
       break;
 
 
   }
 }
 
+else if(BASE==1){
+  Estado=3;
+  switch (Estado)
+  {
+    case 3:
+      peticion_trama();
+      Serial.print(Estado);
+      break;
+    case 4:
+     peticion_trama();
+     Serial.print(Estado);
+      break;
+    case 5:
+      peticion_trama();
+      Serial.print(Estado);
+      break;
+   
 
+  }
+  
+  
+  
+  }
+}
 /*Nivel de Pertenencia ADM*/
-int descubrimiendo_nivel_ADM(){
-  escucha(2*B);
-  int NIVEL_ESCUCHADO = TRAMA[2];
-  if (pte != 0){ // si se escucha una trama PT
-         // while (millis() < start + 600) {
-            if (NIVEL_ESCUCHADO < NIVEL_ADM) {
-              NIVEL_ADM = NIVEL_ESCUCHADO+1;
-              
-            }
-          }
-
-   else{
-          Estado=0;//Regreso al estado de HIBERNACIÓN
-          return;
+void nivel()
+{
+  while (millis() < start + 600) {
+    if (thread_level < NIVEL_ADM) {
+      NIVEL_ADM = thread_level;
     }
+  }
+  NIVEL_ADM++;
+  /*Nivel de Pertenencia AMD*/
+  x = NIVEL_ADM % (MCL * 2);
+  y = (MCL * 2) - x;
+
+  if (x < y)
+    NIVEL_AMD = x;
+  else
+    NIVEL_AMD = y;
+  if (x == 0)
+    cluster = 1;
 }
 
-//int descubrimiendo_nivel_AMD(){    
-//    /*Nivel de Pertenencia AMD*/
-//    x = NIVEL_ADM % (MCL * 2);
-//    y = (MCL * 2) - x;
-//  
-//    if (x < y)
-//      NIVEL_AMD = x;
-//    else
-//      NIVEL_AMD = y;
-//    if (x == 0)
-//      cluster = 1;
-//  
-//else{
-//    Estado=0;//Regreso al estado de HIBERNACIÓN
-//    return;
-//}
-//}
-
-void hibernacion(int cont, int alarm) {
+void hibernacion() {
 
 
   // put your main code here, to run repeatedly:
-  delay(1000);
-  int sleepMS = Watchdog.sleep(200);
+  
+  LowPower.idle(SLEEP_250MS, ADC_ON, TIMER4_ON, TIMER3_ON, TIMER1_ON, TIMER0_ON, SPI_OFF, USART1_ON, TWI_ON, USB_ON);
+  Serial.print("a");
+       
 
-  if (alarm == 0)
+  if (alarma == 0)
   {
     if (conta >= 20)
     {
+      Estado=1;
+      conta=0;
       return;
     }
     if (conta <= 20)
     {
-      conth = conth + 1;
-      hibernacion(cont, alarm);
+      conta = conta + 1;
+      Estado=0;
     }
   }
-  if (alarm != 0)
+  if (alarma != 0)
   {
+    Estado=3;
     return;
   }
 
@@ -440,8 +487,7 @@ void gen_ACK(char* TRAMA){
 
 int peticion_trama()
 {
-  while (current_state != verificacion)
-  {
+  
     switch (current_state)
     {
       case primera_fase:
@@ -458,12 +504,32 @@ int peticion_trama()
             escucha(2*B);
             if (rtse != 0){
               current_state = segunda_fase;
+              Estado=4;
+              return;
             }
-            else{
-            //Paso a hibernación
+            else if(BASE==0) {
+            Estado=0;
             return;   
             }
+               
         }
+        else{
+          if (alarma==0 && BASE==0){
+            Estado=0;
+            return;
+          }
+          else{
+            if (BASE==0){
+            Estado=11;
+            }
+            else{
+              Estado=0;}
+            return;
+            }
+        }
+        }
+
+          
       case segunda_fase:
         {
             CTS[0] = 243;
@@ -474,15 +540,22 @@ int peticion_trama()
             MAC_destinatario = TRAMA[4];
             rf69.send(CTS, sizeof(CTS));
             current_state = escuchar;
+            Estado=5;
+            return;
         }
       case escuchar:
         {
           escucha(2*B); //tiempo de espera 2B
-          if (alarmae!= 0) {
+          if (alarmae!= 0 && BASE==0) {
             current_state = verificacion;
+            Estado=6;
+            return;
           }
           else  {
-            //RETORNA A HIBERNACION
+            Estado=3;
+            if(BASE==0){
+            Estado=11;
+            }
             return;
           }
         }
@@ -494,17 +567,22 @@ int peticion_trama()
           ACK_OUT[2] = MAC_destinario; //REVISAR si es la MAC local o la del destinatario??
           escucha(2*B); //tiempo de espera 2B
           if (alarmae == 0){
-            //guardar trama en la pila;
+            borrado=0;
+            pila_alarmas();
             current_state = primera_fase;
+            Estado=3;
+            return;
           }
           else { 
             current_state = verificacion;
+            Estado=6;
+            return;
           }
         }
     }
   }
-}
-}
+
+
 
 void prim_estado(){
  if (ctse != 0 or rtse != 0){ // si CTS o RTS estan activos
@@ -586,7 +664,9 @@ void cuar_estado(){
       if (acke != 0){
          CHECK_SUM_recibido=TRAMA[2];
          if (CHECK_SUM_recibido==CHECK_SUM_enviado){
-         //limpia memoria
+         borrado=1;
+         pila_alarmas();
+         borrado=0;
          Estado=0;// pasa a HIBERNACIÓN
          }
         else {
@@ -600,3 +680,42 @@ void cuar_estado(){
         //Pasa a hibernacion
        } 
 }
+
+void Fuego() {
+  Serial.print("fuego");
+  Pila_alarmas[0]=4;
+  Pila_alarmas[1]=NIVEL_ADM;
+  alarma=1;
+}
+void Moto_sierra() {
+  Serial.print("sierra");
+  Pila_alarmas[0]=2;
+  Pila_alarmas[1]=NIVEL_ADM;
+  alarma=1;
+}
+void Disparo() {
+  Serial.print("Disparo");
+  Pila_alarmas[0]=1;
+  Pila_alarmas[1]=NIVEL_ADM;
+  alarma=1;
+}
+void AD() {
+  Serial.print("ad");
+  Pila_alarmas[0]=5;
+  Pila_alarmas[1]=NIVEL_ADM;
+  alarma=1;
+}
+void pila_alarmas() {
+  if (borrado==1){
+  Pila_alarmas[0]=0;
+  Pila_alarmas[1]=0;
+  alarma=0;
+  }
+  else {
+    Pila_alarmas[0]=TRAMA[1];
+    Pila_alarmas[1]=TRAMA[2];
+    alarma=1;
+    
+  }
+}
+  
