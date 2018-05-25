@@ -557,8 +557,10 @@ int peticion_trama()
             return;
           }
           else  {
+            current_state = primera_fase;
             Estado=3;
             if(BASE==0){
+            current_state = primera_fase;
             Estado=11;
             }
             return;
