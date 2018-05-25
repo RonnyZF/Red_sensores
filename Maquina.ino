@@ -509,6 +509,7 @@ int peticion_trama()
               return;
             }
             else if(BASE==0) {
+            current_state = primera_fase;
             Estado=0;
             return;   
             }
@@ -516,14 +517,17 @@ int peticion_trama()
         }
         else{
           if (alarma==0 && BASE==0){
+            current_state = primera_fase;
             Estado=0;
             return;
           }
           else{
             if (BASE==0){
+            current_state = primera_fase;
             Estado=11;
             }
             else{
+              current_state = primera_fase;
               Estado=0;}
             return;
             }
