@@ -313,6 +313,21 @@ else if(BASE==1){
   }
 }
 /*Nivel de Pertenencia ADM*/
+int descubrimiendo_nivel_ADM(){
+  escucha(2*B);
+  int NIVEL_ESCUCHADO = TRAMA[2];
+  if (pte != 0){ // si se escucha una trama PT
+         // while (millis() < start + 600) {
+            if (NIVEL_ESCUCHADO < NIVEL_ADM) {
+              NIVEL_ADM = NIVEL_ESCUCHADO+1;
+              
+            }
+          }
+
+   else{
+          Estado=0;//Regreso al estado de HIBERNACIÓN
+          return;
+
 void nivel()
 {
   start = millis();
