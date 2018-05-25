@@ -46,7 +46,7 @@ int Trama_ack = 0;
 int cont = 0;
 int Estado = 0;
 int level_ADM = 255;
-int start = millis();
+int start;  ////CAMBIADO PORQUE NO SE PUEDE IGUALAR A MILLIS TODAVIA, YA QUE TOMA EN CUENTA EL TIEMPO QUE CORRE EL ARDUINO.
 int thread_level;
 int x, y;
 int MCL = 3;
@@ -315,6 +315,7 @@ else if(BASE==1){
 /*Nivel de Pertenencia ADM*/
 void nivel()
 {
+  start = millis();
   while (millis() < start + 600) {
     if (thread_level < NIVEL_ADM) {
       NIVEL_ADM = thread_level;
@@ -523,8 +524,8 @@ int peticion_trama()
           }
           else{
             if (BASE==0){
-            current_state = primera_fase;
-            Estado=11;
+            current_state = primera_fase; // va a primera fase de peticion de trama, no de espera
+            Estado=3;
             }
             else{
               current_state = primera_fase;
@@ -561,7 +562,7 @@ int peticion_trama()
             Estado=3;
             if(BASE==0){
             current_state = primera_fase;
-            Estado=11;
+            Estado=3;
             }
             return;
           }
