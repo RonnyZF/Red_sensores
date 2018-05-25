@@ -429,6 +429,7 @@ void escucha(int tiempoenmilis)  {
   }
   else {
     Serial.println("Receive failed");
+    return;
   }
 }
 
