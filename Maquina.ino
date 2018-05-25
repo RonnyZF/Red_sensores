@@ -353,12 +353,12 @@ void hibernacion() {
     if (conta <= 20)
     {
       conta = conta + 1;
-      Estado=0;
+      Estado=0;   ///Aqui es Estado => Primer Estado de Peticion de Trama (3)
     }
   }
   if (alarma != 0)
   {
-    Estado=3;
+    Estado=3;     ///Estado => Primer Estado de Espera (11)
     return;
   }
 
