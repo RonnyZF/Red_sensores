@@ -516,55 +516,8 @@ int peticion_trama()
           escucha(2 * B);
           if (ctse == 0 or rtse == 0) // si CTS o RTS estan activos ¿HAY QUE AGREGAR PT?
           {
-            NIVEL_ADM=2;
-            char b[2];
-            String str; 
-            str=String(NIVEL_ADM); 
-            str.toCharArray(b,2);
-            
-            int NIVE=24;
-            char c[2];
-            String str2; 
-            str2=String(NIVE); 
-            str2.toCharArray(c,2);
-            char d[10];
-            strcat(d,c);
-            strcat(d,b);
-            Serial.println(d);
-
-            int np1 = 240;
-            char P1;
-            String stp1;
-            stp1 = String(np1);
-            stp1.toCharArray(P1,2);
-
-            int np2 = 48;
-            char P2;
-            String stp2;
-            stp2 = String(np2);
-            stp2.toCharArray(P2,2);
-            char ptm[5];
-            Serial.println("Datos \n");
-            Serial.println(P1);
-            Serial.println(P2);
-            Serial.println(NIVEL_ADM);
-            Serial.println(MAC_local);
-            //strcat(ptm,P1);
-            Serial.println(ptm);
-            //strcat(ptm,P2);
-            Serial.println(ptm);
-            strcat(ptm,char(NIVEL_ADM));
-            Serial.println(ptm);
-            strcat(ptm,char(MAC_local));
-            Serial.println("datoooo \n");
-            Serial.println(ptm);
-
-
-
-
-            
-            PT1[0] = 0x240;
-            PT1[1] = 0x48;
+            PT1[0] = 0xF0;
+            PT1[1] = 0x30;
             PT1[2] = NIVEL_ADM;
             PT1[3] = MAC_local;
             rf69.send(PT1, sizeof(PT1)); // asi se envia un dato
